@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'bun:test';
-import { jsx, jsxs, jsxDEV } from '@rex/jsx/compiler';
-import { Fragment } from '@rex/jsx/runtime';
+import { jsx, jsxs, jsxDEV } from '@ramejs/jsx/compiler';
+import { Fragment } from '@ramejs/jsx/runtime';
 
 describe('jsx factory', () => {
-  it('sets $$typeof to rex.element', () => {
+  it('sets $$typeof to rame.element', () => {
     const el = jsx('div', {});
-    expect(el.$$typeof).toBe('rex.element');
+    expect(el.$$typeof).toBe('rame.element');
   });
 
   it('sets type to the given string', () => {

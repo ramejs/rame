@@ -3,7 +3,7 @@ import { z } from 'zod';
 // ---------------------------------------------------------------------------
 // BasePropsSchema
 //
-// Every Rex component's prop schema MUST extend this.
+// Every Rame component's prop schema MUST extend this.
 // It provides the common fields the renderer and tooling rely on.
 // ---------------------------------------------------------------------------
 

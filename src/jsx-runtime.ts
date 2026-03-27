@@ -1,15 +1,15 @@
-// This file is the automatic JSX import source (`rex/jsx-runtime`).
-// The TypeScript compiler inserts `import { jsx, jsxs, Fragment } from "rex/jsx-runtime"`
+// This file is the automatic JSX import source (`rame/jsx-runtime`).
+// The TypeScript compiler inserts `import { jsx, jsxs, Fragment } from "rame/jsx-runtime"`
 // at the top of every .tsx file automatically — you never import it yourself.
 
-import { RexComponentFn, RexElement } from './core/component';
+import { RameComponentFn, RameElement } from '@ramejs/rame/component';
 export { jsx, jsxs, jsxDEV } from './jsx/compiler';
 export { Fragment } from './jsx/runtime';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace JSX {
   /** The type of every JSX expression, e.g. `const el: JSX.Element = <Foo />` */
-  type Element = RexElement;
+  type Element = RameElement;
 
   /** Tells TypeScript which prop holds children. */
   interface ElementChildrenAttribute {
@@ -22,7 +22,7 @@ export declare namespace JSX {
    * failures when TypeScript checks concrete components against this type.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  type ElementType = RexComponentFn<any>;
+  type ElementType = RameComponentFn<any>;
 
   /**
    * No built-in for now

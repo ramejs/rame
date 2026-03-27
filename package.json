@@ -1,5 +1,5 @@
 {
-  "name": "@rex/core",
+  "name": "@ramejs/rame",
   "version": "0.1.0",
   "description": "A JSX-driven, schema-validated component runtime for terminal and server-side.",
   "license": "MIT",

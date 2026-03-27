@@ -1,12 +1,12 @@
-import { Fragment } from '@rex/jsx/runtime';
-import { RexElement, RexNode } from './component';
+import { Fragment } from '@ramejs/jsx/runtime';
+import { RameElement, RameNode } from './component';
 
 /**
- * This is the core rendering function that takes a `RexNode` (the result of rendering a component) and processes it.
+ * This is the core rendering function that takes a `RameNode` (the result of rendering a component) and processes it.
  * During rendering nothing is actually returned, instead functions are awaited and called
  * Note: Do not forget to await :)
  */
-export async function render(node: RexNode): Promise<void> {
+export async function render(node: RameNode): Promise<void> {
   // Base case: primitive values (string, number, boolean) and null/undefined are returned as-is.
   // This is because rendering them brings nothing on the table
   if (!node || ['string', 'number', 'boolean'].includes(typeof node)) {
@@ -23,7 +23,7 @@ export async function render(node: RexNode): Promise<void> {
   }
 
   // At this point, node is a single element
-  const element = (await node) as RexElement;
+  const element = (await node) as RameElement;
 
   // If the element is a Fragment, we need to render its children directly without any wrapper.
   if (element.type === Fragment) {
@@ -42,6 +42,6 @@ export async function render(node: RexNode): Promise<void> {
 
   // Intrinsic string tag — reserved for future host bindings
   throw new Error(
-    `[Rex] Intrinsic element <${element.type}> is not yet supported. Use function components only at this time.`,
+    `[Rame] Intrinsic element <${element.type}> is not yet supported. Use function components only at this time.`,
   );
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect, spyOn } from 'bun:test';
-import { render, Fragment } from '@rex/index';
-import { RawLog } from '@rex/components/RawLog';
+import { render, Fragment } from '@ramejs/index';
+import { RawLog } from '@ramejs/components/RawLog';
 
 describe('RawLog', () => {
   it('prints the content', async () => {

@@ -1,10 +1,10 @@
-# @rex/core
+# @ramejs/rame
 
-Write terminal and server-side output using JSX. Components are just functions — validated by Zod, composed with `render()`.
+Write terminal and server-side output using JSX. Components are plain async functions — validated by Zod, composed with `render()`.
 
 ```tsx
-import { render, Fragment } from '@rex/core';
-import { RawLog } from '@rex/core/components/RawLog';
+import { render, Fragment } from '@ramejs/rame';
+import { RawLog } from '@ramejs/rame/components/RawLog';
 
 await render(
   <Fragment>
@@ -24,81 +24,203 @@ await render(
 ## Install
 
 ```bash
-npm install @rex/core zod
+npm install @ramejs/rame zod
 ```
 
-> `zod` is a peer dependency — you control the version.
+> `zod` is a peer dependency — install it alongside rame and control the version yourself.
 
 ## Setup
 
-Add this to your `tsconfig.json`:
+Add two options to your `tsconfig.json`:
 
 ```json
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "@rex/core"
+    "jsxImportSource": "@ramejs/rame"
   }
 }
 ```
 
-That's all. No Babel, no extra plugins.
+No Babel, no extra plugins. TypeScript handles the JSX transform automatically.
 
-## Concepts
+---
+
+## Core API
 
 ### `render(node)`
 
-Walks and executes the component tree. Components run in order, top to bottom, and async components are awaited automatically.
+Walks the component tree and runs every component in order, top to bottom. Async components are awaited before the next sibling runs.
 
 ```tsx
-await render(<MyComponent />);
+import { render } from '@ramejs/rame';
+
+await render(<App />);
 ```
 
-### `defineComponent(schema, fn)`
+### `defineComponent(schema, fn, displayName?)`
 
-Creates a component with Zod-validated props. The schema is attached to the function so tooling can introspect it.
+Attaches a Zod schema to a component function. Props are validated at runtime — a `ZodError` is thrown on invalid input. The third argument sets an optional `displayName` for debugging.
 
 ```tsx
-import { defineComponent } from '@rex/core';
+import { defineComponent } from '@ramejs/rame';
 import { z } from 'zod';
 
-const Greet = defineComponent(z.object({ name: z.string() }), (props) => {
-  const { name } = GreetSchema.parse(props);
-  console.log(`Hello, ${name}`);
-  return null;
-});
+const Greet = defineComponent(
+  z.object({ name: z.string() }),
+  ({ name }) => {
+    console.log(`Hello, ${name}!`);
+    return null;
+  },
+  'Greet',
+);
 
 await render(<Greet name="world" />);
+// Hello, world!
 ```
 
 ### `Fragment`
 
-Groups sibling components without an extra wrapper — same idea as React fragments.
+Groups multiple components without introducing a wrapper element — same concept as React fragments.
 
 ```tsx
-<Fragment>
-  <RawLog content="first" />
-  <RawLog content="second" />
-</Fragment>
+import { render, Fragment } from '@ramejs/rame';
+
+await render(
+  <Fragment>
+    <Greet name="Alice" />
+    <Greet name="Bob" />
+  </Fragment>,
+);
 ```
+
+---
+
+## Examples
+
+### A component that returns JSX
+
+```tsx
+import { defineComponent, render, Fragment } from '@ramejs/rame';
+import { RawLog } from '@ramejs/rame/components/RawLog';
+import { z } from 'zod';
+
+const AppStartup = defineComponent(z.object({ port: z.number() }), ({ port }) => (
+  <Fragment>
+    <RawLog type="info" content={`Listening on port ${port}`} />
+    <RawLog type="debug" content={`PID: ${process.pid}`} />
+  </Fragment>
+));
+
+await render(<AppStartup port={3000} />);
+// [INFO]  2026-03-28T10:00:00.000Z Listening on port 3000
+// [DEBUG] 2026-03-28T10:00:00.000Z PID: 12345
+```
+
+### Rendering a list
+
+```tsx
+import { render, Fragment } from '@ramejs/rame';
+import { RawLog } from '@ramejs/rame/components/RawLog';
+
+const failed = ['users', 'orders', 'payments'];
+
+await render(
+  <Fragment>
+    {failed.map((service) => (
+      <RawLog type="error" content={`${service} service unreachable`} />
+    ))}
+  </Fragment>,
+);
+// [ERROR] 2026-03-28T10:00:00.000Z users service unreachable
+// [ERROR] 2026-03-28T10:00:00.000Z orders service unreachable
+// [ERROR] 2026-03-28T10:00:00.000Z payments service unreachable
+```
+
+### Async component
+
+`render()` awaits each component before moving to the next sibling.
+
+```tsx
+import { defineComponent, render, Fragment } from '@ramejs/rame';
+import { RawLog } from '@ramejs/rame/components/RawLog';
+import { z } from 'zod';
+
+const HealthCheck = defineComponent(
+  z.object({ name: z.string(), url: z.string().url() }),
+  async ({ name, url }) => {
+    const res = await fetch(url);
+    return (
+      <RawLog
+        type={res.ok ? 'info' : 'error'}
+        content={`${name}: ${res.ok ? 'OK' : 'FAILED'} (${res.status})`}
+      />
+    );
+  },
+);
+
+await render(
+  <Fragment>
+    <HealthCheck name="api" url="https://api.example.com/health" />
+    <HealthCheck name="db" url="https://db.example.com/ping" />
+  </Fragment>,
+);
+// [INFO]  2026-03-28T10:00:00.000Z api: OK (200)
+// [ERROR] 2026-03-28T10:00:00.000Z db: FAILED (503)
+```
+
+### Composing components
+
+```tsx
+import { defineComponent, render, Fragment } from '@ramejs/rame';
+import { RawLog } from '@ramejs/rame/components/RawLog';
+import { z } from 'zod';
+
+const EnvVar = defineComponent(z.object({ key: z.string() }), ({ key }) => {
+  const value = process.env[key];
+  return value ? (
+    <RawLog type="info" content={`${key}=${value}`} />
+  ) : (
+    <RawLog type="warn" content={`${key} is not set`} />
+  );
+});
+
+await render(
+  <Fragment>
+    {['NODE_ENV', 'DATABASE_URL', 'PORT'].map((key) => (
+      <EnvVar key={key} />
+    ))}
+  </Fragment>,
+);
+// [INFO]  2026-03-28T10:00:00.000Z NODE_ENV=production
+// [WARN]  2026-03-28T10:00:00.000Z DATABASE_URL is not set
+// [INFO]  2026-03-28T10:00:00.000Z PORT=3000
+```
+
+---
 
 ## Built-in components
 
 ### `RawLog`
 
-Prints a colorized, timestamped log line.
-
-| Prop      | Type                                     | Default  | Description                  |
-| --------- | ---------------------------------------- | -------- | ---------------------------- |
-| `content` | `string`                                 | —        | The message to print         |
-| `type`    | `"info" \| "warn" \| "error" \| "debug"` | `"info"` | Controls the label and color |
+Prints a colorized, timestamped log line to stdout.
 
 ```tsx
-import { RawLog } from '@rex/core/components/RawLog';
-
-<RawLog content="Cache warmed up" />
-<RawLog type="debug" content="Payload size: 4kb" />
+import { RawLog } from '@ramejs/rame/components/RawLog';
 ```
+
+| Prop      | Type                                     | Default    | Description                  |
+| --------- | ---------------------------------------- | ---------- | ---------------------------- |
+| `content` | `string`                                 | (required) | The message to print         |
+| `type`    | `"info" \| "warn" \| "error" \| "debug"` | `"info"`   | Controls the label and color |
+
+```tsx
+<RawLog content="Cache warmed up" />
+<RawLog type="debug" content={`Heap used: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}mb`} />
+<RawLog type="error" content="Connection refused" />
+```
+
+---
 
 ## License
 

@@ -1,17 +1,22 @@
-import { RexComponentFn, RexElement, RexProps, RexPropsWithChildren } from '@rex/core/component';
+import {
+  RameComponentFn,
+  RameElement,
+  RameProps,
+  RamePropsWithChildren,
+} from '@ramejs/rame/component';
 import { Fragment } from './runtime';
 
 /**
  * This is `jsx` function that will be called by the JSX transpiler to create elements.
  * It takes a type (which can be a string for HTML elements, a function for components,
- * or the Fragment component), props, and an optional key, and returns a RexElement object.
+ * or the Fragment component), props, and an optional key, and returns a RameElement object.
  */
-export function jsx<P extends RexProps | RexPropsWithChildren>(
-  type: RexComponentFn<P> | typeof Fragment | string,
+export function jsx<P extends RameProps | RamePropsWithChildren>(
+  type: RameComponentFn<P> | typeof Fragment | string,
   props: P,
-): RexElement<P> {
+): RameElement<P> {
   return {
-    $$typeof: 'rex.element',
+    $$typeof: 'rame.element',
     type,
     props,
   };

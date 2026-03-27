@@ -1,5 +1,5 @@
 import { RawLogPropsSchema, RawLogTypeToANSITransformer, type RawLogProps } from './schema';
-import { defineComponent } from '../../core/component';
+import { defineComponent } from '@ramejs/rame/component';
 
 // ---------------------------------------------------------------------------
 // ANSI color helpers

@@ -6,7 +6,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "@rex/core",
+    "jsxImportSource": "@ramejs/rame",
     "outDir": "./dist",
     "moduleResolution": "bundler",
     "removeComments": true,
@@ -23,9 +23,10 @@
     "resolveJsonModule": true,
     "baseUrl": "src",
     "paths": {
-      "@rex/*": ["./*"],
-      "@rex/core/jsx-runtime": ["./jsx-runtime"],
-      "@rex/core/jsx-dev-runtime": ["./jsx-runtime"]
+      "@ramejs/*": ["./*"],
+      "@ramejs/rame/*": ["./core/*"],
+      "@ramejs/rame/jsx-runtime": ["./jsx-runtime"],
+      "@ramejs/rame/jsx-dev-runtime": ["./jsx-runtime"]
     }
   },
   "exclude": ["node_modules"],

@@ -1,7 +1,7 @@
 /**
- * @rex/core — RawLog Examples
+ * @ramejs/rame — RawLog Examples
  *
- * RawLog is a built-in Rex component that prints a formatted, colorized log
+ * RawLog is a built-in Rame component that prints a formatted, colorized log
  * line to the console. It accepts two props:
  *
  *   content  (string)                       — the message to print
