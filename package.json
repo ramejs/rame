@@ -12,9 +12,9 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./components/RawLog": {
-      "import": "./dist/components/RawLog/index.js",
-      "types": "./dist/components/RawLog/index.d.ts"
+    "./components/*": {
+      "import": "./dist/components/*/index.js",
+      "types": "./dist/components/*/index.d.ts"
     },
     "./jsx-runtime": {
       "import": "./dist/jsx-runtime.js",
@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "bun run build",
     "clean": "rm -rf dist",
     "dev": "bun run src/index.ts",
     "test": "bun test",
