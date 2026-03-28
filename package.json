@@ -1,6 +1,6 @@
 {
   "name": "@ramejs/rame",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A JSX-driven, schema-validated component runtime for terminal and server-side.",
   "license": "MIT",
   "type": "module",
@@ -10,14 +10,20 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./jsx-runtime": {
       "import": "./dist/jsx-runtime.js",
+      "require": "./dist/jsx-runtime.js",
+      "default": "./dist/jsx-runtime.js",
       "types": "./dist/jsx-runtime.d.ts"
     },
     "./jsx-dev-runtime": {
       "import": "./dist/jsx-runtime.js",
+      "require": "./dist/jsx-runtime.js",
+      "default": "./dist/jsx-runtime.js",
       "types": "./dist/jsx-runtime.d.ts"
     }
   },
