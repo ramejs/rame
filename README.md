@@ -4,7 +4,7 @@ Write terminal and server-side output using JSX. Components are plain async func
 
 ```tsx
 import { render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/components/RawLog';
+import { RawLog } from '@ramejs/rame';
 
 await render(
   <Fragment>
@@ -102,7 +102,7 @@ await render(
 
 ```tsx
 import { defineComponent, render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/components/RawLog';
+import { RawLog } from '@ramejs/rame/RawLog';
 import { z } from 'zod';
 
 const AppStartup = defineComponent(z.object({ port: z.number() }), ({ port }) => (
@@ -121,7 +121,7 @@ await render(<AppStartup port={3000} />);
 
 ```tsx
 import { render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/components/RawLog';
+import { RawLog } from '@ramejs/rame/RawLog';
 
 const failed = ['users', 'orders', 'payments'];
 
@@ -143,7 +143,7 @@ await render(
 
 ```tsx
 import { defineComponent, render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/components/RawLog';
+import { RawLog } from '@ramejs/rame/RawLog';
 import { z } from 'zod';
 
 const HealthCheck = defineComponent(
@@ -173,7 +173,7 @@ await render(
 
 ```tsx
 import { defineComponent, render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/components/RawLog';
+import { RawLog } from '@ramejs/rame/RawLog';
 import { z } from 'zod';
 
 const EnvVar = defineComponent(z.object({ key: z.string() }), ({ key }) => {
@@ -206,7 +206,7 @@ await render(
 Prints a colorized, timestamped log line to stdout.
 
 ```tsx
-import { RawLog } from '@ramejs/rame/components/RawLog';
+import { RawLog } from '@ramejs/rame/RawLog';
 ```
 
 | Prop      | Type                                     | Default    | Description                  |

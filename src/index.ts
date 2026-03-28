@@ -14,3 +14,5 @@ export type {
   RameNode,
 } from '@ramejs/rame/component';
 export type { BaseProps } from './schemas/base';
+
+export { RawLog } from './components/RawLog';
