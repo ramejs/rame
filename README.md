@@ -101,8 +101,7 @@ await render(
 ### A component that returns JSX
 
 ```tsx
-import { defineComponent, render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/RawLog';
+import { defineComponent, render, Fragment, RawLog } from '@ramejs/rame';
 import { z } from 'zod';
 
 const AppStartup = defineComponent(z.object({ port: z.number() }), ({ port }) => (
@@ -120,8 +119,7 @@ await render(<AppStartup port={3000} />);
 ### Rendering a list
 
 ```tsx
-import { render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/RawLog';
+import { render, Fragment, RawLog } from '@ramejs/rame';
 
 const failed = ['users', 'orders', 'payments'];
 
@@ -142,8 +140,7 @@ await render(
 `render()` awaits each component before moving to the next sibling.
 
 ```tsx
-import { defineComponent, render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/RawLog';
+import { defineComponent, render, Fragment, RawLog } from '@ramejs/rame';
 import { z } from 'zod';
 
 const HealthCheck = defineComponent(
@@ -172,8 +169,7 @@ await render(
 ### Composing components
 
 ```tsx
-import { defineComponent, render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame/RawLog';
+import { defineComponent, render, Fragment, RawLog } from '@ramejs/rame';
 import { z } from 'zod';
 
 const EnvVar = defineComponent(z.object({ key: z.string() }), ({ key }) => {

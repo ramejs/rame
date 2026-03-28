@@ -1,9 +1,4 @@
-import {
-  RameComponentFn,
-  RameElement,
-  RameProps,
-  RamePropsWithChildren,
-} from '@ramejs/rame/component';
+import { RameComponentFn, RameElement, RameProps, RamePropsWithChildren } from '../core/component';
 import { Fragment } from './runtime';
 
 /**

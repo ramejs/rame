@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test';
-import { render, defineComponent, Fragment } from '@ramejs/index';
+import { render, defineComponent, Fragment } from '../../index';
 import { z } from 'zod';
 
 describe('render', () => {

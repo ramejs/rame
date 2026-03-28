@@ -1,4 +1,4 @@
-import { RameElement, RamePropsWithChildren } from '@ramejs/rame/component';
+import { RameElement, RamePropsWithChildren } from '../core/component';
 
 /**
  * A built-in component for fragments — allows grouping multiple children without an extra wrapper element.

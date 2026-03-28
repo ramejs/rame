@@ -1,5 +1,5 @@
-export { render } from '@ramejs/rame/renderer';
-export { defineComponent } from '@ramejs/rame/component';
+export { render } from './core/renderer';
+export { defineComponent } from './core/component';
 export { Fragment, isRameElement } from './jsx/runtime';
 
 export { BasePropsSchema } from './schemas/base';
@@ -12,7 +12,7 @@ export type {
   RameComponentFn,
   RameElement,
   RameNode,
-} from '@ramejs/rame/component';
+} from './core/component';
 export type { BaseProps } from './schemas/base';
 
 export { RawLog } from './components/RawLog';

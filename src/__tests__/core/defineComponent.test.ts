@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import { z } from 'zod';
-import { defineComponent } from '@ramejs/rame/component';
+import { defineComponent } from '../../core/component';
 
 describe('defineComponent', () => {
   it('attaches the schema to the component', () => {

@@ -2,7 +2,7 @@
 // The TypeScript compiler inserts `import { jsx, jsxs, Fragment } from "rame/jsx-runtime"`
 // at the top of every .tsx file automatically — you never import it yourself.
 
-import { RameComponentFn, RameElement } from '@ramejs/rame/component';
+import { RameComponentFn, RameElement } from './core/component';
 export { jsx, jsxs, jsxDEV } from './jsx/compiler';
 export { Fragment } from './jsx/runtime';
 

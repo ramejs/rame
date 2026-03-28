@@ -1,4 +1,4 @@
-import { Fragment } from '@ramejs/jsx/runtime';
+import { Fragment } from '../jsx/runtime';
 import { RameElement, RameNode } from './component';
 
 /**

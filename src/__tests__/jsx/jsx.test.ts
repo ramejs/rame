@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
-import { jsx, jsxs, jsxDEV } from '@ramejs/jsx/compiler';
-import { Fragment } from '@ramejs/jsx/runtime';
+import { jsx, jsxs, jsxDEV } from '../../jsx/compiler';
+import { Fragment } from '../../jsx/runtime';
 
 describe('jsx factory', () => {
   it('sets $$typeof to rame.element', () => {

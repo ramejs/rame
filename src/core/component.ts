@@ -1,4 +1,4 @@
-import { Fragment } from '@ramejs/jsx/runtime';
+import { Fragment } from '../jsx/runtime';
 import { input, ZodType } from 'zod';
 
 // A special symbol to identify Rame elements at runtime.
