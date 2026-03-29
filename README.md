@@ -1,25 +1,6 @@
 # @ramejs/rame
 
-Write terminal and server-side output using JSX. Components are plain async functions — validated by Zod, composed with `render()`.
-
-```tsx
-import { render, Fragment } from '@ramejs/rame';
-import { RawLog } from '@ramejs/rame';
-
-await render(
-  <Fragment>
-    <RawLog type="info" content="Server started on :3000" />
-    <RawLog type="warn" content="Running without TLS" />
-    <RawLog type="error" content="Database unreachable" />
-  </Fragment>,
-);
-```
-
-```
-[INFO]  2026-03-28T10:00:00.000Z Server started on :3000
-[WARN]  2026-03-28T10:00:00.000Z Running without TLS
-[ERROR] 2026-03-28T10:00:00.000Z Database unreachable
-```
+Write backend/server output using JSX — for Node.js, CLI tools, and server-side rendering. Components are plain async functions, props are validated with Zod, and everything is rendered in order.
 
 ## Install
 
@@ -31,7 +12,7 @@ npm install @ramejs/rame zod
 
 ## Setup
 
-Add two options to your `tsconfig.json`:
+Add to your `tsconfig.json`:
 
 ```json
 {
@@ -46,38 +27,80 @@ No Babel, no extra plugins. TypeScript handles the JSX transform automatically.
 
 ---
 
-## Core API
-
-### `render(node)`
-
-Walks the component tree and runs every component in order, top to bottom. Async components are awaited before the next sibling runs.
+## Quick Example
 
 ```tsx
-import { render } from '@ramejs/rame';
+import { render, Fragment } from '@ramejs/rame';
+import { RawLog } from '@ramejs/rame';
 
-await render(<App />);
+await render(
+  <Fragment>
+    <RawLog type="info" content="Server started on :3000" />
+    <RawLog type="warn" content="Running without TLS" />
+    <RawLog type="error" content="Database unreachable" />
+  </Fragment>,
+);
 ```
 
-### `defineComponent(schema, fn, displayName?)`
+---
 
-Attaches a Zod schema to a component function. Props are validated at runtime — a `ZodError` is thrown on invalid input. The third argument sets an optional `displayName` for debugging.
+## Context Example (Node.js)
 
 ```tsx
-import { defineComponent } from '@ramejs/rame';
-import { z } from 'zod';
+import { render, createContext, useContext, Fragment } from '@ramejs/rame';
 
-const Greet = defineComponent(
-  z.object({ name: z.string() }),
-  ({ name }) => {
-    console.log(`Hello, ${name}!`);
-    return null;
-  },
-  'Greet',
+// Create a context for the current environment
+const EnvContext = createContext<'dev' | 'prod'>('dev');
+
+// Arrow function component (like React)
+const LogEnv = ({ label }: { label: string }) => {
+  const env = useContext(EnvContext);
+  console.log(`${label}: ${env}`);
+  return null;
+};
+
+const EnvProvider = ({ value, children }: { value: 'dev' | 'prod'; children?: any }) => (
+  <EnvContext.Provider value={value}>{children}</EnvContext.Provider>
 );
 
-await render(<Greet name="world" />);
-// Hello, world!
+await render(
+  <Fragment>
+    <LogEnv label="Default env" />
+    <EnvProvider value="prod">
+      <LogEnv label="Inside provider" />
+    </EnvProvider>
+    <LogEnv label="After provider" />
+  </Fragment>,
+);
+// Output:
+// Default env: dev
+// Inside provider: prod
+// After provider: dev
 ```
+
+---
+
+## API
+
+- `render(node)` — Walks the component tree and runs every component in order, top to bottom. Async components are awaited before the next sibling runs.
+- `defineComponent(schema, fn, displayName?)` — Attaches a Zod schema to a component function. Props are validated at runtime. The third argument sets an optional `displayName` for debugging.
+- `createContext(defaultValue)` — Creates a context object for sharing values across the tree. Use `Provider`, `Consumer`, or `useContext` to read values.
+- `useContext(ctx)` — Reads the current value of a context inside a component.
+- `Fragment` — Groups multiple children without a wrapper.
+- `RawLog` — Prints a colorized, timestamped log line to stdout.
+
+---
+
+## More Examples
+
+- See `examples/basic.tsx` for logging
+- See `examples/context-simple.tsx` and `examples/context-multi.tsx` for context usage
+
+---
+
+## License
+
+MIT
 
 ### `Fragment`
 
@@ -101,15 +124,14 @@ await render(
 ### A component that returns JSX
 
 ```tsx
-import { defineComponent, render, Fragment, RawLog } from '@ramejs/rame';
-import { z } from 'zod';
+import { render, Fragment, RawLog } from '@ramejs/rame';
 
-const AppStartup = defineComponent(z.object({ port: z.number() }), ({ port }) => (
+const AppStartup = ({ port }: { port: number }) => (
   <Fragment>
     <RawLog type="info" content={`Listening on port ${port}`} />
     <RawLog type="debug" content={`PID: ${process.pid}`} />
   </Fragment>
-));
+);
 
 await render(<AppStartup port={3000} />);
 // [INFO]  2026-03-28T10:00:00.000Z Listening on port 3000
@@ -140,21 +162,17 @@ await render(
 `render()` awaits each component before moving to the next sibling.
 
 ```tsx
-import { defineComponent, render, Fragment, RawLog } from '@ramejs/rame';
-import { z } from 'zod';
+import { render, Fragment, RawLog } from '@ramejs/rame';
 
-const HealthCheck = defineComponent(
-  z.object({ name: z.string(), url: z.string().url() }),
-  async ({ name, url }) => {
-    const res = await fetch(url);
-    return (
-      <RawLog
-        type={res.ok ? 'info' : 'error'}
-        content={`${name}: ${res.ok ? 'OK' : 'FAILED'} (${res.status})`}
-      />
-    );
-  },
-);
+const HealthCheck = async ({ name, url }: { name: string; url: string }) => {
+  const res = await fetch(url);
+  return (
+    <RawLog
+      type={res.ok ? 'info' : 'error'}
+      content={`${name}: ${res.ok ? 'OK' : 'FAILED'} (${res.status})`}
+    />
+  );
+};
 
 await render(
   <Fragment>
@@ -169,17 +187,16 @@ await render(
 ### Composing components
 
 ```tsx
-import { defineComponent, render, Fragment, RawLog } from '@ramejs/rame';
-import { z } from 'zod';
+import { render, Fragment, RawLog } from '@ramejs/rame';
 
-const EnvVar = defineComponent(z.object({ key: z.string() }), ({ key }) => {
+const EnvVar = ({ key }: { key: string }) => {
   const value = process.env[key];
   return value ? (
     <RawLog type="info" content={`${key}=${value}`} />
   ) : (
     <RawLog type="warn" content={`${key} is not set`} />
   );
-});
+};
 
 await render(
   <Fragment>

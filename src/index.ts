@@ -1,5 +1,6 @@
 export { render } from './core/renderer';
 export { defineComponent } from './core/component';
+export { createContext, useContext } from './core/context';
 export { Fragment, isRameElement } from './jsx/runtime';
 
 export { BasePropsSchema } from './schemas/base';
