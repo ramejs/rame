@@ -98,10 +98,6 @@ await render(
 
 ---
 
-## License
-
-MIT
-
 ### `Fragment`
 
 Groups multiple components without introducing a wrapper element — same concept as React fragments.
