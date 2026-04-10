@@ -1,0 +1,9 @@
+name: Question / other
+description: Ask a question or open a discussion that doesn't fit the other templates
+body:
+  - type: textarea
+    id: content
+    attributes:
+      label: What's on your mind?
+    validations:
+      required: true
