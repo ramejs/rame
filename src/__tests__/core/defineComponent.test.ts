@@ -26,4 +26,11 @@ describe('defineComponent', () => {
     const comp = defineComponent(schema, ({ value }) => value * 2);
     expect(comp({ value: 5 })).toBe(10);
   });
+
+  it('automatically validates props before invoking the component', () => {
+    const schema = z.object({ value: z.number().int().positive() });
+    const comp = defineComponent(schema, ({ value }) => value * 2);
+
+    expect(() => comp({ value: -1 })).toThrow();
+  });
 });

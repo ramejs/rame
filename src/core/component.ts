@@ -8,8 +8,12 @@ export interface RameElement<P = RamePropsWithChildren> {
   readonly props: P;
 }
 
+export type RameValue = string | number | boolean | null | undefined | object;
+
+export type RameResolvedValue = RameValue | RameResolvedValue[];
+
 // A special symbol to identify fragments at runtime.
-type RameNodeAwaited = RameElement | string | number | boolean | null | undefined | RameNode[];
+type RameNodeAwaited = RameElement | RameValue | RameNode[];
 
 // A special type for fragments — allows grouping multiple children without an extra wrapper element.
 export type RameNode = Promise<RameNodeAwaited> | RameNodeAwaited;
@@ -61,7 +65,10 @@ export function defineComponent<TSchema extends ZodType>(
   fn: RameComponentFn<input<TSchema>>,
   displayName?: string,
 ): RameComponent<TSchema> {
-  const component = fn as RameComponent<TSchema>;
+  const component = ((props: input<TSchema>) => {
+    const parsedProps = schema.parse(props) as input<TSchema>;
+    return fn(parsedProps);
+  }) as RameComponent<TSchema>;
 
   // Attach the schema to the component function for runtime validation and tooling support.
   component.schema = schema;
