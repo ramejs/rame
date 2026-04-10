@@ -1,6 +1,6 @@
 {
   "name": "@ramejs/rame",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "A JSX-driven, schema-validated component runtime for terminal and server-side.",
   "license": "MIT",
   "type": "module",

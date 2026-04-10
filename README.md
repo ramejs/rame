@@ -83,11 +83,40 @@ await render(
 ## API
 
 - `render(node)` — Walks the component tree and runs every component in order, top to bottom. Async components are awaited before the next sibling runs.
-- `defineComponent(schema, fn, displayName?)` — Attaches a Zod schema to a component function. Props are validated at runtime. The third argument sets an optional `displayName` for debugging.
+- `renderToValue(node)` — Like `render`, but returns the resolved value of the root component instead of discarding it. Use this when the component tree produces data (e.g. a JSON response from a route handler).
+- `defineComponent(schema, fn, displayName?)` — Attaches a Zod schema to a component function. Props are **automatically validated** via `schema.parse()` before the component runs — no manual parsing needed. The third argument sets an optional `displayName` for debugging.
 - `createContext(defaultValue)` — Creates a context object for sharing values across the tree. Use `Provider`, `Consumer`, or `useContext` to read values.
 - `useContext(ctx)` — Reads the current value of a context inside a component.
 - `Fragment` — Groups multiple children without a wrapper.
 - `RawLog` — Prints a colorized, timestamped log line to stdout.
+
+---
+
+## Returning data from a component tree
+
+Use `renderToValue` when the root component (or any descendant) returns a plain value instead of a side effect:
+
+```tsx
+import { renderToValue, defineComponent, createContext, useContext } from '@ramejs/rame';
+import { z } from 'zod';
+
+const SessionContext = createContext<{ userId: string } | null>(null);
+
+const Me = defineComponent(z.object({}), () => {
+  const session = useContext(SessionContext);
+  return { id: session!.userId };
+});
+
+const result = await renderToValue(
+  <SessionContext.Provider value={{ userId: 'u_42' }}>
+    <Me />
+  </SessionContext.Provider>,
+);
+
+console.log(result); // { id: 'u_42' }
+```
+
+This is the foundation for integrations like `@ramejs/fastify`, where route handlers evaluate a component subtree and use the returned value as an HTTP response.
 
 ---
 

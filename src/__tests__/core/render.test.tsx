@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'bun:test';
-import { render, defineComponent, Fragment } from '../../index';
+import {
+  render,
+  renderToValue,
+  defineComponent,
+  Fragment,
+  createContext,
+  useContext,
+} from '../../index';
 import { z } from 'zod';
 
 describe('render', () => {
@@ -144,5 +151,76 @@ describe('render', () => {
     await render(<Outer />);
 
     expect(rendered).toEqual(['outer', 'inner']);
+  });
+
+  it('returns a plain object value from a component subtree', async () => {
+    const Payload = defineComponent(z.object({}), () => ({ ok: true, service: 'api' }));
+
+    await expect(renderToValue(<Payload />)).resolves.toEqual({ ok: true, service: 'api' });
+  });
+
+  it('preserves plain data arrays as values', async () => {
+    const ListUsers = defineComponent(z.object({}), () => [{ id: 'u_1', name: 'Ada' }]);
+
+    await expect(renderToValue(<ListUsers />)).resolves.toEqual([{ id: 'u_1', name: 'Ada' }]);
+  });
+
+  it('returns a provider-wrapped subtree value', async () => {
+    const AuthContext = createContext<{ userId: string } | null>(null);
+
+    const Me = defineComponent(z.object({}), () => {
+      const session = useContext(AuthContext);
+      return { id: session!.userId };
+    });
+
+    await expect(
+      renderToValue(
+        <AuthContext.Provider value={{ userId: 'u_42' }}>
+          <Me />
+        </AuthContext.Provider>,
+      ),
+    ).resolves.toEqual({ id: 'u_42' });
+  });
+
+  it('returns an async component value', async () => {
+    const AsyncPayload = defineComponent(z.object({}), async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return { ready: true };
+    });
+
+    await expect(renderToValue(<AsyncPayload />)).resolves.toEqual({ ready: true });
+  });
+
+  it('propagates guard response envelopes through wrappers', async () => {
+    const AuthContext = createContext<{ userId: string } | null>(null);
+
+    const RequireAuth = defineComponent(
+      z.object({ children: z.any().optional() }),
+      ({ children }) => {
+        const session = useContext(AuthContext);
+
+        if (!session) {
+          return {
+            status: 401,
+            body: { error: 'Unauthorized' },
+          };
+        }
+
+        return children ?? null;
+      },
+    );
+
+    await expect(
+      renderToValue(
+        <AuthContext.Provider value={null}>
+          <RequireAuth>
+            <Fragment />
+          </RequireAuth>
+        </AuthContext.Provider>,
+      ),
+    ).resolves.toEqual({
+      status: 401,
+      body: { error: 'Unauthorized' },
+    });
   });
 });

@@ -1,5 +1,68 @@
-import { Fragment } from '../jsx/runtime';
-import { RameElement, RameNode } from './component';
+import { Fragment, isRameElement } from '../jsx/runtime';
+import { RameElement, RameNode, RameResolvedValue } from './component';
+
+function collapseRenderedSiblings(results: RameResolvedValue[]): RameResolvedValue {
+  const meaningfulResults = results.filter((result) => result !== null && result !== undefined);
+
+  if (meaningfulResults.length === 0) {
+    return null;
+  }
+
+  return meaningfulResults;
+}
+
+async function renderAwaitedNode(node: Awaited<RameNode>): Promise<RameResolvedValue> {
+  if (
+    node === null ||
+    node === undefined ||
+    ['string', 'number', 'boolean'].includes(typeof node)
+  ) {
+    return node;
+  }
+
+  if (Array.isArray(node)) {
+    const results: RameResolvedValue[] = [];
+    let containsRenderableChildren = false;
+
+    for (const child of node) {
+      const awaitedChild = await child;
+
+      if (Array.isArray(awaitedChild) || isRameElement(awaitedChild)) {
+        containsRenderableChildren = true;
+      }
+
+      results.push(await renderAwaitedNode(awaitedChild));
+    }
+
+    if (!containsRenderableChildren) {
+      return results;
+    }
+
+    return collapseRenderedSiblings(results);
+  }
+
+  if (!isRameElement(node)) {
+    return node as RameResolvedValue;
+  }
+
+  const element = node as RameElement;
+
+  if (element.type === Fragment) {
+    const { children } = element.props;
+    if (children !== undefined) {
+      return await renderToValue(children);
+    }
+    return null;
+  }
+
+  if (typeof element.type === 'function') {
+    return await renderToValue(await element.type(element.props));
+  }
+
+  throw new Error(
+    `[Rame] Intrinsic element <${element.type}> is not yet supported. Use function components only at this time.`,
+  );
+}
 
 /**
  * This is the core rendering function that takes a `RameNode` (the result of rendering a component) and processes it.
@@ -7,41 +70,15 @@ import { RameElement, RameNode } from './component';
  * Note: Do not forget to await :)
  */
 export async function render(node: RameNode): Promise<void> {
-  // Base case: primitive values (string, number, boolean) and null/undefined are returned as-is.
-  // This is because rendering them brings nothing on the table
-  if (!node || ['string', 'number', 'boolean'].includes(typeof node)) {
-    return;
-  }
+  await renderToValue(node);
+}
 
-  // If the node is an array, we need to render each child in sequence.
-  if (Array.isArray(node)) {
-    for (const child of node) {
-      // Note: we await each child before rendering the next one to ensure proper sequencing, especially if some children are promises.
-      await render(await child);
-    }
-    return;
-  }
-
-  // At this point, node is a single element
-  const element = (await node) as RameElement;
-
-  // If the element is a Fragment, we need to render its children directly without any wrapper.
-  if (element.type === Fragment) {
-    const { children } = element.props;
-    if (children !== undefined) {
-      await render(children);
-    }
-    return;
-  }
-
-  // Function component — invoke it with its props and render the result.
-  if (typeof element.type === 'function') {
-    await render(await element.type(element.props));
-    return;
-  }
-
-  // Intrinsic string tag — reserved for future host bindings
-  throw new Error(
-    `[Rame] Intrinsic element <${element.type}> is not yet supported. Use function components only at this time.`,
-  );
+/**
+ * Evaluates a node tree and returns its resolved value.
+ *
+ * This is useful for host integrations like HTTP servers that need to run a
+ * component subtree and capture its result instead of discarding it.
+ */
+export async function renderToValue(node: RameNode): Promise<RameResolvedValue> {
+  return await renderAwaitedNode(await node);
 }

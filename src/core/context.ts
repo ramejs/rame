@@ -1,5 +1,5 @@
-import { render } from './renderer';
-import type { RameComponentFn, RameNode } from './component';
+import { renderToValue } from './renderer';
+import type { RameComponentFn, RameNode, RameResolvedValue } from './component';
 
 /**
  * Interface for the Provider component's props. `value` is the context value to provide,
@@ -105,17 +105,16 @@ class RameContextImpl<T> implements RameContext<T> {
   constructor(readonly defaultValue: T) {}
 
   // Pushes `value` onto the stack, renders children, then pops it — even if
-  // rendering throws. Returns `null` so the outer render loop has nothing
-  // further to process.
-  Provider = async ({ value, children }: ProviderProps<T>): Promise<null> => {
+  // rendering throws. Returns the resolved subtree value so host integrations
+  // can preserve results across the provider boundary.
+  Provider = async ({ value, children }: ProviderProps<T>): Promise<RameResolvedValue> => {
     const stack = getStack(this);
     stack.push(value);
     try {
-      await render(children ?? null);
+      return await renderToValue(children ?? null);
     } finally {
       stack.pop();
     }
-    return null;
   };
 
   // Reads the nearest Provider's value and passes it to the render-prop child.
