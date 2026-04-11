@@ -2,6 +2,18 @@
   "name": "@ramejs/rame",
   "version": "0.2.1",
   "description": "A JSX-driven, schema-validated component runtime for terminal and server-side.",
+  "keywords": [
+    "jsx",
+    "jsx-runtime",
+    "component",
+    "schema",
+    "zod",
+    "terminal",
+    "server-side",
+    "renderer",
+    "declarative",
+    "typescript"
+  ],
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
