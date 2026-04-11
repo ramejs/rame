@@ -1,5 +1,7 @@
 # @ramejs/rame
 
+[![Discord](https://img.shields.io/discord/1492554668708986890?style=flat&logo=discord&logoColor=white&labelColor=dark)](https://discord.gg/ramejs)
+
 Write backend/server output using JSX — for Node.js, CLI tools, and server-side rendering. Components are plain async functions, props are validated with Zod, and everything is rendered in order.
 
 ## Install
