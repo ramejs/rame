@@ -23,7 +23,7 @@ interface ConsumerProps<T> {
  * Holds the Provider and Consumer components, the default value, and an
  * optional display name for tooling.
  */
-interface RameContext<T> {
+export interface RameContext<T> {
   readonly $$typeof: 'rame.context';
   readonly defaultValue: T;
 

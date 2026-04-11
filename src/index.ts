@@ -16,6 +16,7 @@ export type {
   RameResolvedValue,
   RameValue,
 } from './core/component';
+export type { RameContext } from './core/context';
 export type { BaseProps } from './schemas/base';
 
 export { RawLog } from './components/RawLog';
