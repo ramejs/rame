@@ -1,10 +1,6 @@
 import { z } from 'zod';
 import { BasePropsSchema } from '../../schemas/base';
 
-// ---------------------------------------------------------------------------
-// RawLog props schema
-// ---------------------------------------------------------------------------
-
 // Log levels supported by RawLog.
 export const RawLogType = z.enum(['info', 'warn', 'error', 'debug']);
 

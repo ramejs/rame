@@ -4,19 +4,11 @@ import { render, defineComponent, Fragment } from '../../index';
 import { createContext, useContext } from '../../core/context';
 
 describe('createContext / useContext', () => {
-  // ---------------------------------------------------------------------------
-  // Context shape
-  // ---------------------------------------------------------------------------
-
   it('exposes $$typeof and defaultValue on the context object', () => {
     const Ctx = createContext('initial');
     expect(Ctx.$$typeof).toBe('rame.context');
     expect(Ctx.defaultValue).toBe('initial');
   });
-
-  // ---------------------------------------------------------------------------
-  // Provider + useContext
-  // ---------------------------------------------------------------------------
 
   it('provides the default value when no Provider is present', async () => {
     const Ctx = createContext('default');
@@ -251,10 +243,6 @@ describe('createContext / useContext', () => {
     expect(received).toBeNull();
   });
 
-  // ---------------------------------------------------------------------------
-  // Consumer (render-prop)
-  // ---------------------------------------------------------------------------
-
   it('Consumer passes the default value when no Provider is present', async () => {
     const Ctx = createContext('fallback');
     let received = '';
@@ -326,10 +314,6 @@ describe('createContext / useContext', () => {
 
     expect(received).toBe('C');
   });
-
-  // ---------------------------------------------------------------------------
-  // Provider cleanup on error
-  // ---------------------------------------------------------------------------
 
   it('pops the value even if a child throws', async () => {
     const Ctx = createContext('safe');

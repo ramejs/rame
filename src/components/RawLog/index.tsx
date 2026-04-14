@@ -1,23 +1,10 @@
 import { RawLogPropsSchema, RawLogTypeToANSITransformer, type RawLogProps } from './schema';
 import { defineComponent } from '../../core/component';
 
-// ---------------------------------------------------------------------------
-// ANSI color helpers
-// ---------------------------------------------------------------------------
-
 const ANSI = {
   reset: '\x1b[0m',
   bold: '\x1b[1m',
 } as const;
-
-// ---------------------------------------------------------------------------
-// RawLog component
-//
-// Usage:
-//   <RawLog content="Server started" type="info" />
-//   <RawLog content="Something went wrong" type="error" />
-//   <RawLog content="Cache miss" />   ← type defaults to "info"
-// ---------------------------------------------------------------------------
 
 export const RawLog = defineComponent(
   RawLogPropsSchema,
