@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import { render, Fragment } from '../../index';
 import { useState, useEffect } from '../../core/state';
-import type { Signal, SetState } from '../../core/state';
+import type { Signal, SetState, DisposeEffect } from '../../core/state';
 
 describe('useState', () => {
   it('returns undefined as the initial value when none is provided', () => {
@@ -471,5 +471,48 @@ describe('useState + useEffect inside render', () => {
     // Child's effect runs once at registration (count is already 7 by then)
     // and no further re-runs because dispose() is called immediately after
     expect(effectLog).toEqual(['child sees: 7']);
+  });
+});
+
+describe('useState — Publisher / Subscriber integration', () => {
+  it('Subscriber logs every state increment driven by Publisher interval', async () => {
+    const log: number[] = [];
+    let disposePublisher: DisposeEffect | undefined;
+
+    const Subscriber = ({ state }: { state: Signal<number> }) => {
+      useEffect(() => {
+        log.push(state());
+      }, [state]);
+      return null;
+    };
+
+    const Publisher = ({ setState }: { setState: SetState<number>; state: Signal<number> }) => {
+      disposePublisher = useEffect(() => {
+        const id = setInterval(() => {
+          setState((prev) => prev + 1);
+        }, 100);
+        return () => clearInterval(id);
+      }, []);
+      return null;
+    };
+
+    const App = () => {
+      const [state, setState] = useState(0);
+      return (
+        <Fragment>
+          <Subscriber state={state} />
+          <Publisher setState={setState} state={state} />
+        </Fragment>
+      );
+    };
+
+    await render(<App />);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 350));
+
+    disposePublisher!();
+
+    // Subscriber fires once on mount (0) then on each interval tick (1, 2, 3)
+    expect(log).toEqual([0, 1, 2, 3]);
   });
 });
