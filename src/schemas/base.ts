@@ -1,11 +1,9 @@
 import { z } from 'zod';
 
-// ---------------------------------------------------------------------------
-// BasePropsSchema
-//
-// Every Rame component's prop schema MUST extend this.
-// It provides the common fields the renderer and tooling rely on.
-// ---------------------------------------------------------------------------
+/**
+ *  Every Rame component's prop schema MUST extend this.
+ * It provides the common fields the renderer and tooling rely on.
+ */
 
 export const BasePropsSchema = z.object({
   /**
