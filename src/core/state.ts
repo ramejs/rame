@@ -85,6 +85,40 @@ function runEffect(record: EffectRecord): void {
 }
 
 /**
+ * Creates a read-only signal from a plain value.
+ *
+ * Unlike `useState`, there is no setter — the signal's value is fixed at
+ * creation time. Useful for providing constant default context values without
+ * reaching for the `useState` hack.
+ *
+ * @example
+ * ```ts
+ * const zero = createSignal(0);
+ * zero(); // 0
+ * ```
+ */
+export function createSignal<T>(value: T): Signal<T> {
+  const meta: SignalMeta<T> = { value, effects: new Set() };
+
+  const signal = function signal(): T {
+    return meta.value;
+  } as Signal<T>;
+
+  signal.getValue = (): T => meta.value;
+
+  Object.defineProperty(signal, '$$typeof', {
+    value: 'rame.signal' as const,
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  });
+
+  signalRegistry.set(signal, meta);
+
+  return signal;
+}
+
+/**
  * Creates an in-memory reactive state value.
  */
 export function useState<T>(): [Signal<T | undefined>, SetState<T | undefined>];

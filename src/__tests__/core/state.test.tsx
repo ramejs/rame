@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'bun:test';
-import { render, Fragment } from '../../index';
+import { render, Fragment, createContext, useContext, createSignal } from '../../index';
+import type { RameNode } from '../../index';
 import { useState, useEffect } from '../../core/state';
 import type { Signal, SetState, DisposeEffect } from '../../core/state';
 
@@ -514,5 +515,203 @@ describe('useState — Publisher / Subscriber integration', () => {
 
     // Subscriber fires once on mount (0) then on each interval tick (1, 2, 3)
     expect(log).toEqual([0, 1, 2, 3]);
+  });
+});
+
+describe('useState + useContext — Publisher / Subscriber integration via context', () => {
+  it('Subscriber logs combined increments from two contexts driven by Publisher interval', async () => {
+    interface SomeContextValue {
+      number: Signal<number>;
+      changeNumber: SetState<number>;
+    }
+
+    interface AnotherContextValue {
+      number: Signal<number>;
+      changeNumber: SetState<number>;
+    }
+
+    const SomeContext = createContext<SomeContextValue>({
+      number: createSignal(0),
+      changeNumber: () => {},
+    });
+    const AnotherContext = createContext<AnotherContextValue>({
+      number: createSignal(50),
+      changeNumber: () => {},
+    });
+
+    const SomeContextProvider = ({ children }: { children?: RameNode }) => {
+      const [number, setNumber] = useState(0);
+      const changeNumber: SetState<number> = (value) => setNumber(value);
+      return (
+        <SomeContext.Provider value={{ number, changeNumber }}>{children}</SomeContext.Provider>
+      );
+    };
+
+    const AnotherContextProvider = ({ children }: { children?: RameNode }) => {
+      const [number, setNumber] = useState(50);
+      const changeNumber: SetState<number> = (value) => setNumber(value);
+      return (
+        <AnotherContext.Provider value={{ number, changeNumber }}>
+          {children}
+        </AnotherContext.Provider>
+      );
+    };
+
+    const log: string[] = [];
+    let disposePublisher: DisposeEffect | undefined;
+
+    const Subscriber = () => {
+      const { number: someNumber } = useContext(SomeContext);
+      const { number: anotherNumber } = useContext(AnotherContext);
+
+      useEffect(() => {
+        log.push(`some=${someNumber()},another=${anotherNumber()}`);
+      }, [someNumber, anotherNumber]);
+
+      return null;
+    };
+
+    const Publisher = () => {
+      const { changeNumber: changeSome } = useContext(SomeContext);
+      const { changeNumber: changeAnother } = useContext(AnotherContext);
+
+      disposePublisher = useEffect(() => {
+        const id = setInterval(() => {
+          changeSome((prev) => prev + 1);
+          changeAnother((prev) => prev + 1);
+        }, 25);
+        return () => clearInterval(id);
+      }, []);
+
+      return null;
+    };
+
+    const App = () => (
+      <SomeContextProvider>
+        <AnotherContextProvider>
+          <Fragment>
+            <Subscriber />
+            <Publisher />
+          </Fragment>
+        </AnotherContextProvider>
+      </SomeContextProvider>
+    );
+
+    await render(<App />);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 90));
+
+    disposePublisher!();
+
+    // Subscriber fires on mount (some=0, another=50), then on each tick both signals increment.
+    // Each tick fires the effect twice (once per signal change), but values seen
+    // depend on ordering — first someNumber fires (some=1,another=50), then
+    // anotherNumber fires (some=1,another=51), etc.
+    expect(log).toEqual([
+      'some=0,another=50',
+      'some=1,another=50',
+      'some=1,another=51',
+      'some=2,another=51',
+      'some=2,another=52',
+      'some=3,another=52',
+      'some=3,another=53',
+    ]);
+  });
+
+  it('Subscriber logs combined increments from two contexts driven by Publisher interval', async () => {
+    interface SomeContextValue {
+      number: Signal<number>;
+      changeNumber: SetState<number>;
+    }
+
+    interface AnotherContextValue {
+      number: Signal<number>;
+      changeNumber: SetState<number>;
+    }
+
+    const SomeContext = createContext<SomeContextValue>({
+      number: createSignal(0),
+      changeNumber: () => {},
+    });
+    const AnotherContext = createContext<AnotherContextValue>({
+      number: createSignal(0),
+      changeNumber: () => {},
+    });
+
+    const log: string[] = [];
+    let disposePublisher: DisposeEffect | undefined;
+
+    const Subscriber = ({
+      someNumber,
+      anotherNumber,
+    }: {
+      someNumber: Signal<number>;
+      anotherNumber: Signal<number>;
+    }) => {
+      useEffect(() => {
+        log.push(`some=${someNumber()},another=${anotherNumber()}`);
+      }, [someNumber, anotherNumber]);
+      return null;
+    };
+
+    const Publisher = ({
+      changeSome,
+      changeAnother,
+    }: {
+      changeSome: SetState<number>;
+      changeAnother: SetState<number>;
+    }) => {
+      disposePublisher = useEffect(() => {
+        const id = setInterval(() => {
+          changeSome((prev) => prev + 1);
+          changeAnother((prev) => prev + 1);
+        }, 25);
+        return () => clearInterval(id);
+      }, []);
+      return null;
+    };
+
+    const [someNumber, setSomeNumber] = useState(0);
+    const [anotherNumber, setAnotherNumber] = useState(50);
+
+    const App = () => (
+      <SomeContext.Provider value={{ number: someNumber, changeNumber: setSomeNumber }}>
+        <AnotherContext.Provider value={{ number: anotherNumber, changeNumber: setAnotherNumber }}>
+          <SomeContext.Consumer>
+            {(some) => (
+              <AnotherContext.Consumer>
+                {(another) => (
+                  <Fragment>
+                    <Subscriber someNumber={some.number} anotherNumber={another.number} />
+                    <Publisher
+                      changeSome={some.changeNumber}
+                      changeAnother={another.changeNumber}
+                    />
+                  </Fragment>
+                )}
+              </AnotherContext.Consumer>
+            )}
+          </SomeContext.Consumer>
+        </AnotherContext.Provider>
+      </SomeContext.Provider>
+    );
+
+    await render(<App />);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 90));
+
+    disposePublisher!();
+
+    // Subscriber fires on mount (some=0, another=50), then on each tick both signals increment.
+    // Each tick fires the effect twice (once per signal change).
+    expect(log).toEqual([
+      'some=0,another=50',
+      'some=1,another=50',
+      'some=1,another=51',
+      'some=2,another=51',
+      'some=2,another=52',
+      'some=3,another=52',
+      'some=3,another=53',
+    ]);
   });
 });

@@ -1,7 +1,7 @@
 export { render, renderToValue } from './core/renderer';
 export { defineComponent } from './core/component';
 export { createContext, useContext } from './core/context';
-export { useState, useEffect } from './core/state';
+export { useState, useEffect, createSignal } from './core/state';
 export { Fragment, isRameElement } from './jsx/runtime';
 
 export { BasePropsSchema } from './schemas/base';
