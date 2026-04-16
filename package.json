@@ -1,6 +1,6 @@
 {
   "name": "@ramejs/rame",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A JSX-driven, schema-validated component runtime for terminal and server-side.",
   "keywords": [
     "jsx",
